@@ -63,8 +63,13 @@ export default function UsersList({ users, currentUserId }) {
 
   async function handleDelete(user) {
     if (user.id === currentUserId) return;
-    if (!confirm(`Delete ${user.name}? This will remove their account.`)) return;
-    await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
+    if (!confirm(`Delete ${user.name}? This will remove their account and ALL their properties/data.`)) return;
+    const res = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to delete user");
+      return;
+    }
     router.refresh();
   }
 

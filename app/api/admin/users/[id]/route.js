@@ -51,6 +51,39 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
   }
 
-  await prisma.landlord.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    // Delete in order to satisfy foreign key constraints
+    // 1. Delete all nested data under the user's properties
+    const properties = await prisma.property.findMany({ where: { landlordId: id }, select: { id: true } });
+    const propertyIds = properties.map((p) => p.id);
+    
+    if (propertyIds.length > 0) {
+      const units = await prisma.unit.findMany({ where: { propertyId: { in: propertyIds } }, select: { id: true } });
+      const unitIds = units.map((u) => u.id);
+
+      if (unitIds.length > 0) {
+        // Delete tenant-related data
+        await prisma.message.deleteMany({ where: { tenant: { unitId: { in: unitIds } } } });
+        await prisma.ticket.deleteMany({ where: { unitId: { in: unitIds } } });
+        await prisma.document.deleteMany({ where: { unitId: { in: unitIds } } });
+        await prisma.expense.deleteMany({ where: { unitId: { in: unitIds } } });
+        await prisma.tenant.deleteMany({ where: { unitId: { in: unitIds } } });
+      }
+
+      await prisma.unit.deleteMany({ where: { propertyId: { in: propertyIds } } });
+      await prisma.property.deleteMany({ where: { landlordId: id } });
+    }
+
+    // 2. Delete user-level data
+    await prisma.vendor.deleteMany({ where: { landlordId: id } });
+    await prisma.feedback.deleteMany({ where: { landlordId: id } });
+    await prisma.vacancy.deleteMany({ where: { landlordId: id } });
+
+    // 3. Delete the user
+    await prisma.landlord.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+  }
 }

@@ -33,8 +33,10 @@ export default async function AdminLayout({ children }) {
     if (!selectedPropertyId || !properties.find((p) => p.id === selectedPropertyId)) {
       selectedPropertyId = properties[0]?.id || null;
     }
-  } catch {
-    // Not authenticated yet (redirect will happen)
+  } catch (error) {
+    // redirect() throws NEXT_REDIRECT — must rethrow so it actually redirects
+    if (error?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
+    // Other errors: not authenticated yet, render shell with defaults
   }
 
   return (
