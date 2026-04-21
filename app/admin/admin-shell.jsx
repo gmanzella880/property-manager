@@ -69,9 +69,7 @@ export default function AdminShell({ children, role, properties, selectedPropert
   }
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/sign-in");
-    router.refresh();
+    window.location.href = "/api/admin/logout";
   }
 
   function isActive(href) {
