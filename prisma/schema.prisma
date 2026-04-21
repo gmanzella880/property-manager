@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Landlord {
+  id         String     @id @default(cuid())
+  authId     String     @unique // Logto user sub
+  name       String
+  email      String
+  phone      String     @default("")
+  role       String     @default("admin") // "super_admin" or "admin"
+  createdAt  DateTime   @default(now())
+  properties Property[]
+  vendors    Vendor[]
+  feedback   Feedback[]
+  vacancies  Vacancy[]
+}
+
+model Property {
+  id         String   @id @default(cuid())
+  landlordId String
+  landlord   Landlord @relation(fields: [landlordId], references: [id])
+  name       String
+  address    String
+  units      Unit[]
+  createdAt  DateTime @default(now())
+}
+
+model Unit {
+  id          String     @id @default(cuid())
+  propertyId  String
+  property    Property   @relation(fields: [propertyId], references: [id])
+  unitNumber  String
+  rentAmount  Int
+  tenant      Tenant?
+  tickets     Ticket[]
+  documents   Document[]
+  expenses    Expense[]
+  createdAt   DateTime   @default(now())
+}
+
+model Tenant {
+  id         String     @id @default(cuid())
+  unitId     String     @unique
+  unit       Unit       @relation(fields: [unitId], references: [id])
+  name       String
+  email      String
+  phone      String
+  leaseStart DateTime
+  leaseEnd   DateTime
+  slug       String     @unique
+  active     Boolean    @default(true)
+  tickets    Ticket[]
+  messages   Message[]
+  documents  Document[]
+  feedback   Feedback[]
+  createdAt  DateTime   @default(now())
+}
+
+model Ticket {
+  id          String         @id @default(cuid())
+  tenantId    String
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  unitId      String
+  unit        Unit           @relation(fields: [unitId], references: [id])
+  category    String
+  description String
+  priority    String
+  status      String         @default("open")
+  vendorId    String?
+  vendor      Vendor?        @relation(fields: [vendorId], references: [id])
+  updates     TicketUpdate[]
+  documents   Document[]
+  createdAt   DateTime       @default(now())
+}
+
+model TicketUpdate {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  message   String
+  from      String
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  body      String
+  direction String
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id          String     @id @default(cuid())
+  tenantId    String?
+  tenant      Tenant?    @relation(fields: [tenantId], references: [id])
+  unitId      String?
+  unit        Unit?      @relation(fields: [unitId], references: [id])
+  ticketId    String?
+  ticket      Ticket?    @relation(fields: [ticketId], references: [id])
+  applicantId String?
+  applicant   Applicant? @relation(fields: [applicantId], references: [id])
+  type        String
+  fileName    String
+  fileUrl     String
+  uploadedBy  String
+  expiryDate  DateTime?
+  createdAt   DateTime   @default(now())
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  unitId      String
+  unit        Unit     @relation(fields: [unitId], references: [id])
+  description String
+  amount      Int
+  vendorId    String?
+  vendor      Vendor?  @relation(fields: [vendorId], references: [id])
+  receiptUrl  String?
+  createdAt   DateTime @default(now())
+}
+
+model Vendor {
+  id         String    @id @default(cuid())
+  landlordId String
+  landlord   Landlord  @relation(fields: [landlordId], references: [id])
+  name       String
+  phone      String
+  email      String?
+  specialty  String
+  expenses   Expense[]
+  tickets    Ticket[]
+  createdAt  DateTime  @default(now())
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  landlordId String
+  landlord   Landlord @relation(fields: [landlordId], references: [id])
+  tenantId   String?
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
+  type       String
+  body       String
+  anonymous  Boolean  @default(false)
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+}
+
+model Vacancy {
+  id         String      @id @default(cuid())
+  landlordId String
+  landlord   Landlord    @relation(fields: [landlordId], references: [id])
+  unitId     String
+  status     String      @default("vacant")
+  listedAt   DateTime?
+  applicants Applicant[]
+  createdAt  DateTime    @default(now())
+}
+
+model Applicant {
+  id        String     @id @default(cuid())
+  vacancyId String
+  vacancy   Vacancy    @relation(fields: [vacancyId], references: [id])
+  name      String
+  email     String
+  phone     String
+  status    String     @default("pending")
+  documents Document[]
+  createdAt DateTime   @default(now())
+}
