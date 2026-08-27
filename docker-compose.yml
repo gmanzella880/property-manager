@@ -1,36 +1,61 @@
+# Deployed as a Portainer "Repository" stack.
+# Every ${VAR} below is supplied from Portainer's stack Environment variables UI
+# (or, for local `docker compose up`, from the gitignored .env file).
+# Vars written ${VAR:?...} are REQUIRED - the stack refuses to deploy without them.
+# See .env.example for the full list.
+
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
     image: property-manager:latest
+    restart: unless-stopped
     ports:
-      - "3000:3000"
-    env_file:
-      - .env
+      - "${WEB_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+
+      # Derived from POSTGRES_PASSWORD so there is only one place to change it.
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-propertymanager}
+      DIRECT_URL: postgresql://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-propertymanager}
+
+      LOGTO_ENDPOINT: ${LOGTO_ENDPOINT:?LOGTO_ENDPOINT is required}
+      LOGTO_APP_ID: ${LOGTO_APP_ID:?LOGTO_APP_ID is required}
+      LOGTO_APP_SECRET: ${LOGTO_APP_SECRET:?LOGTO_APP_SECRET is required}
+      LOGTO_COOKIE_SECRET: ${LOGTO_COOKIE_SECRET:?LOGTO_COOKIE_SECRET is required}
+      LOGTO_BASE_URL: ${LOGTO_BASE_URL:?LOGTO_BASE_URL is required}
+
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:?NEXT_PUBLIC_BASE_URL is required}
+
+      # Optional - SMS features stay dormant when these are blank.
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+
+      # Optional - shared secret guarding /api/cron/rent-reminders.
+      CRON_SECRET: ${CRON_SECRET:-}
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
 
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
+    # No published port: the database is reachable only from inside this stack.
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: propertymanager
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-propertymanager}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-propertymanager}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
 volumes:
   postgres_data:

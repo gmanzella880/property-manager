@@ -109,7 +109,7 @@ export default function DocumentsManager({ documents, tenants, units }) {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">File URL</label>
-              <input name="fileUrl" required className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" placeholder="Paste Supabase storage URL" />
+              <input name="fileUrl" required className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" placeholder="Paste a link to the document" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
