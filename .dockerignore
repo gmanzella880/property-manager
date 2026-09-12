@@ -3,7 +3,6 @@
 .gitignore
 .gitattributes
 .sf
-.vercel
 
 # secrets - never bake these into the image, they are injected at runtime
 .env
