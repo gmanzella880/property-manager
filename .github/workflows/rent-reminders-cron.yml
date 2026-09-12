@@ -1,0 +1,16 @@
+name: Rent reminders cron
+
+on:
+  schedule:
+    # Same schedule the old vercel.json cron used - 9am UTC daily.
+    - cron: '0 9 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call rent-reminders endpoint
+        run: |
+          curl -sf -X GET "https://propertymanager.beskarlab.com/api/cron/rent-reminders" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
