@@ -3,13 +3,15 @@
 # (or, for local `docker compose up`, from the gitignored .env file).
 # Vars written ${VAR:?...} are REQUIRED - the stack refuses to deploy without them.
 # See .env.example for the full list.
+#
+# `web` pulls a prebuilt image from GHCR (built by .github/workflows/docker-publish.yml
+# on every push to main) rather than building locally - Portainer's "pull and redeploy"
+# (and GitOps polling) can only ever pull a real registry image, never rebuild a
+# `build:`-context service from source.
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: property-manager:latest
+    image: ghcr.io/gmanzella880/property-manager:latest
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-3000}:3000"
