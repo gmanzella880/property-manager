@@ -106,7 +106,6 @@ export default function UsersList({ users, currentUserId }) {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Jerry Manzella"
                 />
               </div>
               <div>
@@ -117,7 +116,6 @@ export default function UsersList({ users, currentUserId }) {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="jerry@example.com"
                 />
               </div>
               <div>
@@ -127,7 +125,6 @@ export default function UsersList({ users, currentUserId }) {
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="(555) 123-4567"
                 />
               </div>
               <div>
