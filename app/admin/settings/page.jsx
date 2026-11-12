@@ -35,7 +35,7 @@ export default async function Settings() {
           <h2 className="text-lg font-semibold text-gray-900">Public website feed</h2>
           <p className="text-sm text-gray-500 mt-1">
             Paste this link into the website editor so the public site shows live vacancies and rent.
-            It shares property names, addresses, and the unit number and rent of vacant units only.
+            It shares property names, addresses, and the unit number, rent and layout of vacant units only.
           </p>
           <code className="block mt-3 text-sm bg-gray-50 border border-gray-200 rounded-lg p-3 break-all select-all">
             {feedUrl}

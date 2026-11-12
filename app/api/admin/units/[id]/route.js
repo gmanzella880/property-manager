@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { unitDetailsFrom } from "@/lib/unit-details";
 
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -29,6 +30,7 @@ export async function PUT(request, { params }) {
     data: {
       unitNumber: body.unitNumber,
       rentAmount: body.rentAmount != null ? parseInt(body.rentAmount) : undefined,
+      ...unitDetailsFrom(body),
     },
   });
 

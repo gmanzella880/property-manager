@@ -38,6 +38,9 @@ model Unit {
   property    Property   @relation(fields: [propertyId], references: [id])
   unitNumber  String
   rentAmount  Int
+  bedrooms    Int? // 0 = studio
+  bathrooms   Float?
+  squareFeet  Int?
   tenant      Tenant?
   tickets     Ticket[]
   documents   Document[]

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireLandlord, getSelectedPropertyId } from "@/lib/landlord";
+import { unitDetailsFrom } from "@/lib/unit-details";
 
 export async function GET() {
   const landlord = await requireLandlord();
@@ -36,6 +37,7 @@ export async function POST(request) {
       unitNumber,
       rentAmount: parseInt(rentAmount),
       propertyId,
+      ...unitDetailsFrom(body),
     },
   });
 

@@ -19,6 +19,9 @@ export default function AddUnitModal() {
       body: JSON.stringify({
         unitNumber: form.get("unitNumber"),
         rentAmount: parseInt(form.get("rentAmount")),
+        bedrooms: form.get("bedrooms"),
+        bathrooms: form.get("bathrooms"),
+        squareFeet: form.get("squareFeet"),
         propertyId: form.get("propertyId") || undefined,
       }),
     });
@@ -66,6 +69,24 @@ export default function AddUnitModal() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
               placeholder="e.g. 1200"
             />
+          </div>
+
+          <div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                <input name="bedrooms" type="number" min="0" step="1" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" placeholder="0 = studio" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                <input name="bathrooms" type="number" min="0" step="0.5" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" placeholder="e.g. 1.5" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sq ft</label>
+                <input name="squareFeet" type="number" min="0" step="1" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" placeholder="e.g. 880" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Optional. Shown on the public website when this unit is vacant.</p>
           </div>
 
           <div className="flex gap-3 pt-2">

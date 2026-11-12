@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { formatUnitDetails } from "@/lib/unit-details";
 import { User, Wrench, FileText, DollarSign, Pencil, Save, X, Trash2 } from "lucide-react";
 
 const statusColors = {
@@ -16,6 +17,9 @@ export default function UnitDetail({ unit }) {
   const [editing, setEditing] = useState(false);
   const [unitNumber, setUnitNumber] = useState(unit.unitNumber);
   const [rentAmount, setRentAmount] = useState(unit.rentAmount);
+  const [bedrooms, setBedrooms] = useState(unit.bedrooms ?? "");
+  const [bathrooms, setBathrooms] = useState(unit.bathrooms ?? "");
+  const [squareFeet, setSquareFeet] = useState(unit.squareFeet ?? "");
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -23,7 +27,7 @@ export default function UnitDetail({ unit }) {
     await fetch(`/api/admin/units/${unit.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ unitNumber, rentAmount: parseInt(rentAmount) }),
+      body: JSON.stringify({ unitNumber, rentAmount: parseInt(rentAmount), bedrooms, bathrooms, squareFeet }),
     });
     setEditing(false);
     setSaving(false);
@@ -62,12 +66,29 @@ export default function UnitDetail({ unit }) {
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
                   />
                 </div>
+                <div className="flex flex-wrap gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Bedrooms (0 = studio)</label>
+                    <input type="number" min="0" step="1" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} className="w-24 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Bathrooms</label>
+                    <input type="number" min="0" step="0.5" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} className="w-24 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Sq ft</label>
+                    <input type="number" min="0" step="1" value={squareFeet} onChange={(e) => setSquareFeet(e.target.value)} className="w-24 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]" />
+                  </div>
+                </div>
               </div>
             ) : (
               <>
                 <h1 className="text-2xl font-bold text-gray-900">Unit {unit.unitNumber}</h1>
                 <p className="text-sm text-gray-500 mt-1">{unit.property?.name}</p>
                 <p className="text-lg font-semibold text-gray-900 mt-2">${unit.rentAmount.toLocaleString()}/mo</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {formatUnitDetails(unit) || "No bedrooms, bathrooms or size entered yet"}
+                </p>
               </>
             )}
           </div>
