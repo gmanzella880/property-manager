@@ -1,16 +1,51 @@
 name: Rent reminders cron
 
 on:
-  schedule:
-    # Same schedule the old vercel.json cron used - 9am UTC daily.
-    - cron: '0 9 * * *'
+  # Schedule disabled: Twilio is not set up yet, so every run failed and mailed
+  # out an alert each morning. Re-enable by uncommenting these two lines once
+  # TWILIO_* are configured in the Portainer stack and the CRON_SECRET secret
+  # here matches the server's.
+  # schedule:
+  #   - cron: '0 9 * * *'   # 9am UTC daily, matching the old vercel.json cron
   workflow_dispatch: {}
+
+permissions:
+  contents: read
 
 jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Call rent-reminders endpoint
+      - name: Check CRON_SECRET is set
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl -sf -X GET "https://propertymanager.beskarlab.com/api/cron/rent-reminders" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::The CRON_SECRET repository secret is empty or missing."
+            echo "The endpoint rejects the request with 401 without it."
+            echo "Set it under Settings > Secrets and variables > Actions to the"
+            echo "same value as CRON_SECRET in the Portainer stack environment."
+            exit 1
+          fi
+
+      - name: Call rent-reminders endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          # --fail-with-body keeps a non-zero exit on HTTP >= 400 but still prints
+          # the response, so a failed run says why instead of just "exit code 22".
+          http_status=$(curl -sS --fail-with-body \
+            -o response.txt -w '%{http_code}' \
+            --max-time 120 \
+            -X GET "https://propertymanager.beskarlab.com/api/cron/rent-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET") || curl_failed=1
+
+          echo "HTTP $http_status"
+          echo "Response: $(cat response.txt)"
+
+          if [ -n "$curl_failed" ]; then
+            if [ "$http_status" = "401" ]; then
+              echo "::error::401 Unauthorized - the CRON_SECRET secret here does not match the server's."
+            fi
+            exit 1
+          fi
