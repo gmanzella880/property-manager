@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, User, Wrench, FileText, DollarSign } from "lucide-react";
@@ -13,6 +14,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function UnitDetailPage({ params }) {
+  await requireLandlord();
   const { id } = await params;
   const unit = await prisma.unit.findUnique({
     where: { id },

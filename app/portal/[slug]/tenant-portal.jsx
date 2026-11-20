@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { Building2, Wrench, Lightbulb, Send, Clock, CheckCircle2 } from "lucide-react";
 
@@ -14,8 +15,10 @@ const statusColors = {
   closed: "bg-green-50 text-green-700",
 };
 
-export default function TenantPortal({ tenant }) {
+export default function TenantPortal({ tenant, preview = false }) {
   const router = useRouter();
+  const { signOut } = useClerk();
+  const [error, setError] = useState("");
   const [tab, setTab] = useState("home");
   const [ticketForm, setTicketForm] = useState({ category: "", description: "", priority: "medium" });
   const [feedbackForm, setFeedbackForm] = useState({ type: "idea", body: "", anonymous: false });
@@ -28,13 +31,10 @@ export default function TenantPortal({ tenant }) {
     const res = await fetch("/api/portal/tickets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tenantId: tenant.id,
-        unitId: tenant.unitId,
-        ...ticketForm,
-      }),
-    });
-    if (res.ok) {
+      body: JSON.stringify(ticketForm),
+    }).catch(() => null);
+    setError(res?.ok ? "" : (await res?.json().catch(() => ({})))?.error || "Could not submit. Please try again.");
+    if (res?.ok) {
       setSuccess("Ticket submitted successfully!");
       setTicketForm({ category: "", description: "", priority: "medium" });
       setTimeout(() => setSuccess(""), 3000);
@@ -49,12 +49,10 @@ export default function TenantPortal({ tenant }) {
     const res = await fetch("/api/portal/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tenantId: tenant.id,
-        ...feedbackForm,
-      }),
-    });
-    if (res.ok) {
+      body: JSON.stringify(feedbackForm),
+    }).catch(() => null);
+    setError(res?.ok ? "" : (await res?.json().catch(() => ({})))?.error || "Could not submit. Please try again.");
+    if (res?.ok) {
       setSuccess("Feedback submitted! Thank you.");
       setFeedbackForm({ type: "idea", body: "", anonymous: false });
       setTimeout(() => setSuccess(""), 3000);
@@ -66,15 +64,31 @@ export default function TenantPortal({ tenant }) {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-[#1e3a5f] text-white">
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        {preview && (
+        <p className="bg-amber-100 px-4 py-2 text-center text-sm text-amber-900">
+          Landlord preview of {tenant.name}&apos;s portal. Only the tenant can submit tickets or feedback here.
+        </p>
+      )}
+      {error && <p role="alert" className="bg-red-50 px-4 py-2 text-center text-sm text-red-700">{error}</p>}
+
+      <div className="max-w-2xl mx-auto px-4 py-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg">Georgian Oaks Apartments</h1>
+              <h1 className="font-bold text-lg">{tenant.unit?.property?.name || "Tenant Portal"}</h1>
               <p className="text-sm text-blue-200">Tenant Portal</p>
             </div>
+            {!preview && (
+              <button
+                type="button"
+                onClick={() => signOut({ redirectUrl: "/sign-in?redirect_url=/portal" })}
+                className="ml-auto rounded-lg border border-blue-300/40 px-3 py-1.5 text-sm text-blue-100 hover:bg-white/10 cursor-pointer"
+              >
+                Sign out
+              </button>
+            )}
           </div>
         </div>
       </header>

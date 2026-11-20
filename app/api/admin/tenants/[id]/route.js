@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
 
 export async function GET(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   const tenant = await prisma.tenant.findUnique({
     where: { id },
@@ -21,6 +23,7 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   const body = await request.json();
 
@@ -42,6 +45,7 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   await prisma.tenant.delete({ where: { id } });
   return NextResponse.json({ success: true });

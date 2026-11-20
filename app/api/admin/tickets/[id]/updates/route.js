@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
 
 export async function POST(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   const body = await request.json();
   const { message, from } = body;
