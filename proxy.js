@@ -1,8 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Everything under /admin and /api/admin needs a signed-in user.
+// Admin and tenant portal pages and APIs need a signed-in user.
+// (Who may see what is checked in lib/landlord.js and lib/tenant.js.)
 // Signed-out page visits are sent to /sign-in; signed-out API calls get a 404.
-const isProtected = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
+const isProtected = createRouteMatcher(["/admin(.*)", "/api/admin(.*)", "/portal(.*)", "/api/portal(.*)"]);
 
 export default clerkMiddleware(
   async (auth, req) => {
