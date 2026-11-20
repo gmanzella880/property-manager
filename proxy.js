@@ -1,38 +1,21 @@
-import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Set at request time: `proxy` runs on the Node.js runtime (the Edge runtime is
-// not supported here in Next 16), so this is the real container env, not a value
-// inlined at build time. The Docker build receives no secrets, which is why the
-// old edge middleware needed a hardcoded app-id fallback.
-const APP_ID = process.env.LOGTO_APP_ID;
+// Everything under /admin and /api/admin needs a signed-in user.
+// Signed-out page visits are sent to /sign-in; signed-out API calls get a 404.
+const isProtected = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
 
-export function proxy(request) {
-  const { pathname } = request.nextUrl;
-
-  // These two render their own redirect into the Logto flow.
-  if (pathname.startsWith("/admin/login") || pathname.startsWith("/admin/register")) {
-    return NextResponse.next();
-  }
-
-  // Optimistic check only — does an encrypted Logto session cookie exist at all.
-  // It is never decrypted here. requireLandlord() does the authoritative check on
-  // every /admin page and redirects to /sign-in when the session is absent,
-  // expired, or undecryptable.
-  //
-  // Fails open when APP_ID is missing: guessing the wrong cookie name would
-  // redirect every request to /sign-in, and /callback would land back on /admin
-  // into an endless bounce. requireLandlord() still blocks the request.
-  if (!APP_ID) {
-    return NextResponse.next();
-  }
-
-  if (!request.cookies.get(`logto_${APP_ID}`)?.value) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
-  }
-
-  return NextResponse.next();
-}
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (isProtected(req)) await auth.protect();
+  },
+  // Use this site's own sign-in pages rather than Clerk's hosted ones
+  { signInUrl: "/sign-in", signUpUrl: "/sign-up" }
+);
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    // Skip Next.js internals and static files
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };

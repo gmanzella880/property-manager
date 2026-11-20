@@ -1,7 +1,7 @@
 # Property Manager
 
 A Next.js property management app (landlords, properties, units, tenants,
-tickets, vendors, vacancies) backed by Postgres via Prisma, with Logto for
+tickets, vendors, vacancies) backed by Postgres via Prisma, with Clerk for
 authentication.
 
 ## Getting Started (local dev)
@@ -13,7 +13,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). You'll need a `.env`
 file — see `.env.example` for the required variables (database connection,
-Logto credentials, base URL, etc.) and a local Postgres instance for
+Clerk keys, base URL, etc.) and a local Postgres instance for
 `DATABASE_URL`/`DIRECT_URL` to point at.
 
 ## Deployment

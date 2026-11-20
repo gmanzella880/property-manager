@@ -1,11 +1,5 @@
-import { signIn } from "@logto/next/server-actions";
-import { logtoConfig } from "@/app/logto";
+import { redirect } from "next/navigation";
 
-// Legacy endpoint — redirects to Logto sign-in
-export async function POST() {
-  await signIn(logtoConfig);
-}
-
-export async function GET() {
-  await signIn(logtoConfig);
-}
+// Legacy endpoint: sign-in is handled by Clerk
+export async function GET() { redirect("/sign-in"); }
+export async function POST() { redirect("/sign-in"); }

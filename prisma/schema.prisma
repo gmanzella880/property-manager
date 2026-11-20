@@ -10,7 +10,7 @@ datasource db {
 
 model Landlord {
   id         String     @id @default(cuid())
-  authId     String     @unique // Logto user sub
+  authId     String     @unique // Clerk user id
   name       String
   email      String
   phone      String     @default("")

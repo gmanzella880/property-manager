@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Building2,
@@ -45,6 +46,7 @@ const superAdminItems = [
 export default function AdminShell({ children, role, properties, selectedPropertyId }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false);
 
@@ -69,7 +71,7 @@ export default function AdminShell({ children, role, properties, selectedPropert
   }
 
   async function handleLogout() {
-    window.location.href = "/api/admin/logout";
+    await signOut({ redirectUrl: "/sign-in" });
   }
 
   function isActive(href) {
