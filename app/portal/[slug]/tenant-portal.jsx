@@ -15,7 +15,7 @@ const statusColors = {
   closed: "bg-green-50 text-green-700",
 };
 
-export default function TenantPortal({ tenant, preview = false }) {
+export default function TenantPortal({ tenant, preview = false, children }) {
   const router = useRouter();
   const { signOut } = useClerk();
   const [error, setError] = useState("");
@@ -102,6 +102,8 @@ export default function TenantPortal({ tenant, preview = false }) {
             <p className="font-medium text-gray-900">Rent: ${tenant.unit?.rentAmount?.toLocaleString()}/mo</p>
           </div>
         </div>
+
+        {children}
 
         {/* Success message */}
         {success && (

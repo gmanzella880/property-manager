@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import TenantProfile from "./tenant-profile";
+import RentPanel from "./rent-panel";
+import { monthStatus, rentRecord, periodOf } from "@/lib/rent";
 import { requireLandlord, unitWhere, getSelectedPropertyId } from "@/lib/landlord";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +27,12 @@ export default async function TenantDetailPage({ params }) {
       messages: { orderBy: { createdAt: "asc" } },
       documents: { orderBy: { createdAt: "desc" } },
       feedback: { orderBy: { createdAt: "desc" } },
+      payments: { orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }] },
     },
   });
 
   if (!tenant) notFound();
+  const rentCents = (tenant.unit?.rentAmount || 0) * 100;
 
   return (
     <div>
@@ -36,7 +40,15 @@ export default async function TenantDetailPage({ params }) {
         <ArrowLeft className="w-4 h-4" /> Back to Tenants
       </Link>
 
-      <TenantProfile tenant={JSON.parse(JSON.stringify(tenant))} />
+      <TenantProfile tenant={JSON.parse(JSON.stringify(tenant))}>
+        <RentPanel
+        tenant={{ id: tenant.id, name: tenant.name }}
+        current={monthStatus(rentCents, tenant.payments, periodOf())}
+        record={rentRecord(tenant, rentCents, tenant.payments)}
+        payments={JSON.parse(JSON.stringify(tenant.payments))}
+        canRecord={tenant.active !== false}
+        />
+      </TenantProfile>
     </div>
   );
 }

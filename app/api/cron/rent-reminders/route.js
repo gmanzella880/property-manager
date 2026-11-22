@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import twilioClient from "@/lib/twilio";
 import { shouldSendReminder, reminderMessage } from "@/lib/dates";
+import { monthStatus, periodOf, addMonths } from "@/lib/rent";
 
 export async function GET(request) {
   // Fail closed. The old `process.env.CRON_SECRET && ...` guard silently left the
@@ -43,9 +44,19 @@ export async function GET(request) {
     );
   }
 
-  const tenants = await prisma.tenant.findMany({
-    select: { id: true, name: true, phone: true },
+  // The month being reminded about: the coming 1st, or this month on/after the 1st
+  const period = type === "due_10days" || type === "due_2days" ? addMonths(periodOf(now), 1) : periodOf(now);
+
+  const all = await prisma.tenant.findMany({
+    where: { active: true },
+    select: {
+      id: true, name: true, phone: true,
+      unit: { select: { rentAmount: true } },
+      payments: { where: { period }, select: { period: true, amountCents: true, status: true } },
+    },
   });
+  // Skip tenants who have paid (or whose bank payment is clearing)
+  const tenants = all.filter((t) => monthStatus(t.unit.rentAmount * 100, t.payments, period).balance > 0);
 
   let sent = 0;
   let failed = 0;
@@ -76,5 +87,5 @@ export async function GET(request) {
     }
   }
 
-  return NextResponse.json({ type, sent, failed, total: tenants.length });
+  return NextResponse.json({ type, period, sent, failed, total: tenants.length, skippedPaid: all.length - tenants.length });
 }

@@ -33,38 +33,40 @@ model Property {
 }
 
 model Unit {
-  id          String     @id @default(cuid())
-  propertyId  String
-  property    Property   @relation(fields: [propertyId], references: [id])
-  unitNumber  String
-  rentAmount  Int
-  bedrooms    Int? // 0 = studio
-  bathrooms   Float?
-  squareFeet  Int?
-  tenant      Tenant?
-  tickets     Ticket[]
-  documents   Document[]
-  expenses    Expense[]
-  createdAt   DateTime   @default(now())
+  id         String        @id @default(cuid())
+  propertyId String
+  property   Property      @relation(fields: [propertyId], references: [id])
+  unitNumber String
+  rentAmount Int
+  bedrooms   Int? // 0 = studio
+  bathrooms  Float?
+  squareFeet Int?
+  tenant     Tenant?
+  tickets    Ticket[]
+  documents  Document[]
+  expenses   Expense[]
+  createdAt  DateTime      @default(now())
+  payments   RentPayment[]
 }
 
 model Tenant {
-  id         String     @id @default(cuid())
-  unitId     String     @unique
-  unit       Unit       @relation(fields: [unitId], references: [id])
+  id         String        @id @default(cuid())
+  unitId     String        @unique
+  unit       Unit          @relation(fields: [unitId], references: [id])
   name       String
   email      String
   phone      String
   leaseStart DateTime
   leaseEnd   DateTime
-  slug       String     @unique
-  authId     String?    @unique // Clerk user id, set the first time the tenant signs in
-  active     Boolean    @default(true)
+  slug       String        @unique
+  authId     String?       @unique // Clerk user id, set the first time the tenant signs in
+  active     Boolean       @default(true)
   tickets    Ticket[]
   messages   Message[]
   documents  Document[]
   feedback   Feedback[]
-  createdAt  DateTime   @default(now())
+  payments   RentPayment[]
+  createdAt  DateTime      @default(now())
 }
 
 model Ticket {
@@ -179,4 +181,31 @@ model Applicant {
   status    String     @default("pending")
   documents Document[]
   createdAt DateTime   @default(now())
+}
+
+/// One rent payment: from Stripe (online) or recorded by a landlord (cash, check, ...).
+/// Never deleted: mistakes are voided so the history stays complete.
+model RentPayment {
+  id                    String   @id @default(cuid())
+  tenantId              String
+  tenant                Tenant   @relation(fields: [tenantId], references: [id])
+  unitId                String
+  unit                  Unit     @relation(fields: [unitId], references: [id])
+  period                String // month the payment is for, "YYYY-MM"
+  amountCents           Int
+  method                String // ach | card | cash | check | money_order | other
+  note                  String   @default("") // e.g. check number, or how they paid for "other"
+  paidAt                DateTime
+  status                String   @default("succeeded") // succeeded | pending | failed | voided
+  source                String // stripe | manual
+  stripeSessionId       String?  @unique
+  stripePaymentIntentId String?
+  recordedBy            String   @default("") // name of the landlord who recorded it
+  voidReason            String   @default("")
+  voidedBy              String   @default("")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([tenantId, period])
+  @@index([period])
 }
