@@ -14,7 +14,7 @@ const statusColors = {
   closed: "bg-green-50 text-green-700",
 };
 
-export default function TenantProfile({ tenant }) {
+export default function TenantProfile({ tenant, children }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -169,6 +169,8 @@ export default function TenantProfile({ tenant }) {
           </div>
         </div>
       </div>
+
+      {children}
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-lg mb-6 overflow-x-auto">

@@ -20,7 +20,7 @@ import {
   Menu,
   X,
   ChevronDown,
-  Check,
+  Check, Banknote
 } from "lucide-react";
 import { useState } from "react";
 import clsx from "clsx";
@@ -29,6 +29,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/units", label: "Units", icon: Building2 },
   { href: "/admin/tenants", label: "Tenants", icon: Users },
+  { href: "/admin/rent", label: "Rent", icon: Banknote },
   { href: "/admin/tickets", label: "Tickets", icon: Wrench },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/feedback", label: "Feedback", icon: Lightbulb },
