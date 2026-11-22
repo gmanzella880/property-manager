@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { tenantForRequest } from "@/lib/tenant";
 
 export async function POST(request) {
+  const signedIn = await tenantForRequest();
+  if (!signedIn) return NextResponse.json({ error: "Only the tenant can submit from this portal" }, { status: 403 });
+  const tenantId = signedIn.id;
   const body = await request.json();
-  const { tenantId, type, body: feedbackBody, anonymous } = body;
+  const { type, body: feedbackBody, anonymous } = body;
 
-  if (!type || !feedbackBody || !tenantId) {
+  if (!type || !feedbackBody) {
     return NextResponse.json({ error: "Type and body are required" }, { status: 400 });
   }
 

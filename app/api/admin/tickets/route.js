@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
 
 export async function GET() {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const tickets = await prisma.ticket.findMany({
     include: {
       tenant: { select: { id: true, name: true, phone: true } },
@@ -14,6 +16,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const body = await request.json();
   const { tenantId, unitId, category, description, priority } = body;
 

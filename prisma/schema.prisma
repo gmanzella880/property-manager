@@ -58,6 +58,7 @@ model Tenant {
   leaseStart DateTime
   leaseEnd   DateTime
   slug       String     @unique
+  authId     String?    @unique // Clerk user id, set the first time the tenant signs in
   active     Boolean    @default(true)
   tickets    Ticket[]
   messages   Message[]

@@ -27,6 +27,18 @@ export default function TenantProfile({ tenant }) {
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState("tickets");
   const [active, setActive] = useState(tenant.active !== false);
+  const [inviteMsg, setInviteMsg] = useState("");
+
+  async function sendInvite() {
+    setInviteMsg("Sending...");
+    const res = await fetch(`/api/admin/tenants/${tenant.id}/invite`, { method: "POST" }).catch(() => null);
+    const data = (await res?.json().catch(() => ({}))) || {};
+    setInviteMsg(
+      data.invite === "sent" ? `Invitation emailed to ${tenant.email}.`
+      : data.invite === "has-account" ? "They already have an account and can sign in now."
+      : data.error || "Could not send the invitation. Please try again."
+    );
+  }
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactiveDate, setInactiveDate] = useState(form.leaseEnd);
 
@@ -115,10 +127,19 @@ export default function TenantProfile({ tenant }) {
                     <span className="flex items-center gap-1"><Building2 className="w-3.5 h-3.5" />Unit {tenant.unit?.unitNumber} · ${tenant.unit?.rentAmount?.toLocaleString()}/mo</span>
                     <span>Lease: {new Date(tenant.leaseStart).toLocaleDateString()} — {new Date(tenant.leaseEnd).toLocaleDateString()}</span>
                   </div>
-                  <div className="mt-2">
-                    <Link href={`/portal/${tenant.slug}`} target="_blank" className="inline-flex items-center gap-1 text-xs text-[#1e3a5f] hover:underline">
-                      <ExternalLink className="w-3 h-3" /> Portal: /portal/{tenant.slug}
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
+                    <Link href={`/portal/${tenant.slug}`} target="_blank" className="inline-flex items-center gap-1 text-[#1e3a5f] hover:underline">
+                      <ExternalLink className="w-3 h-3" /> Preview their portal
                     </Link>
+                    <span className={tenant.authId ? "text-green-700" : "text-gray-500"}>
+                      {tenant.authId ? "Portal account: signed in" : "Portal account: not signed in yet"}
+                    </span>
+                    {active && (
+                      <button type="button" onClick={sendInvite} className="rounded border border-gray-300 px-2 py-0.5 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        Send portal invite
+                      </button>
+                    )}
+                    {inviteMsg && <span role="status" className="text-gray-600">{inviteMsg}</span>}
                   </div>
                 </>
               )}

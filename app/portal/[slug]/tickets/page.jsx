@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { requirePortalAccess } from "@/lib/tenant";
 import Link from "next/link";
 import { ArrowLeft, Clock } from "lucide-react";
 
@@ -15,8 +16,9 @@ export const metadata = { title: "My Tickets — Tenant Portal" };
 
 export default async function TenantTicketsPage({ params }) {
   const { slug } = await params;
+  const { tenantId } = await requirePortalAccess(slug);
   const tenant = await prisma.tenant.findUnique({
-    where: { slug },
+    where: { id: tenantId },
     include: {
       tickets: {
         include: { updates: { orderBy: { createdAt: "desc" } } },

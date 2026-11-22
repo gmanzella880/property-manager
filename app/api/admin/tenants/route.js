@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
+import { inviteTenant } from "@/lib/invite";
 
 function generateSlug(name) {
   const base = name
@@ -11,6 +13,7 @@ function generateSlug(name) {
 }
 
 export async function GET() {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const tenants = await prisma.tenant.findMany({
     include: {
       unit: { include: { property: true } },
@@ -21,6 +24,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const body = await request.json();
   const { name, email, phone, unitId, leaseStart, leaseEnd, rentAmount } = body;
 
@@ -63,5 +67,8 @@ export async function POST(request) {
     include: { unit: true },
   });
 
-  return NextResponse.json(tenant, { status: 201 });
+  // Email them an invitation to sign in to the tenant portal
+  const invite = await inviteTenant(email, request);
+
+  return NextResponse.json({ ...tenant, invite }, { status: 201 });
 }

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireLandlord } from "@/lib/landlord";
 import twilioClient from "@/lib/twilio";
 
 export async function GET(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   const ticket = await prisma.ticket.findUnique({
     where: { id },
@@ -22,6 +24,7 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   const body = await request.json();
 
@@ -63,6 +66,7 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const { id } = await params;
   await prisma.ticket.delete({ where: { id } });
   return NextResponse.json({ success: true });
