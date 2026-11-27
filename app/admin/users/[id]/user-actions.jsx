@@ -71,7 +71,7 @@ export default function UserActions({ user, currentUserId }) {
   }
 
   async function deleteProperty(property) {
-    if (!confirm(`Delete "${property.name || "this property"}"? This will also delete all its units, tenants, and data.`)) return;
+    if (!confirm("Are you sure you want to Delete?")) return;
     const res = await fetch(`/api/admin/properties/${property.id}`, { method: "DELETE" });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
