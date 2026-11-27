@@ -11,7 +11,7 @@
 
 services:
   web:
-    image: ghcr.io/gmanzella880/property-manager:101d97776a2c921f5f144cf225fb1fec26d38e13
+    image: ghcr.io/gmanzella880/property-manager:71dfbd7be43b3731b1e1ba9aaf9bde7c7a094c31
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-3000}:3000"
