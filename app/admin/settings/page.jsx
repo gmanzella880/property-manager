@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import SettingsPage from "./settings-form";
 import { requireLandlord, getSelectedPropertyId } from "@/lib/landlord";
 
 export const dynamic = "force-dynamic";
@@ -11,27 +10,22 @@ export default async function Settings() {
   const propertyId = await getSelectedPropertyId(landlord);
 
   const property = propertyId
-    ? await prisma.property.findUnique({
-        where: { id: propertyId },
-        include: { landlord: { select: { id: true, name: true, email: true, phone: true } } },
-      })
+    ? await prisma.property.findUnique({ where: { id: propertyId }, select: { landlordId: true } })
     : null;
 
   const feedUrl = property
-    ? `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/public/listings/${property.landlord.id}`
+    ? `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/public/listings/${property.landlordId}`
     : null;
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-500 mt-1">Property and account settings</p>
+        <p className="text-sm text-gray-500 mt-1">Property names and addresses are edited under Users.</p>
       </div>
 
-      <SettingsPage property={property ? JSON.parse(JSON.stringify(property)) : null} />
-
       {feedUrl && (
-        <div className="mt-6 bg-white rounded-xl border border-gray-200 p-6">
+        <div className="max-w-2xl bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900">Public website feed</h2>
           <p className="text-sm text-gray-500 mt-1">
             Paste this link into the website editor so the public site shows live vacancies and rent.

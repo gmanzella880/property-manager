@@ -8,7 +8,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { name, email, phone, role } = await request.json();
+  const { name, email, phone, role, propertyName, propertyAddress } = await request.json();
 
   if (!name || !email) {
     return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -18,6 +18,12 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 
+  // Admins only see their own properties, so each new admin starts with one
+  const property = { name: (propertyName || "").trim(), address: (propertyAddress || "").trim() };
+  if ((role || "admin") === "admin" && (!property.name || !property.address)) {
+    return NextResponse.json({ error: "Property name and address are required for an admin" }, { status: 400 });
+  }
+
   const user = await prisma.landlord.create({
     data: {
       authId: `manual_${Date.now()}`,
@@ -25,6 +31,7 @@ export async function POST(request) {
       email,
       phone: phone || "",
       role: role || "admin",
+      ...(property.name && { properties: { create: property } }),
     },
   });
 

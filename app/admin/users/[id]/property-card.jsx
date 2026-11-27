@@ -24,8 +24,13 @@ export default function PropertyCard({ property, userName }) {
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete "${property.name}"? This will also delete all its units, tenants, and data.`)) return;
-    await fetch(`/api/admin/properties/${property.id}`, { method: "DELETE" });
+    if (!confirm(`Delete "${property.name || "this property"}"? This will also delete all its units, tenants, and data.`)) return;
+    const res = await fetch(`/api/admin/properties/${property.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to delete property");
+      return;
+    }
     router.refresh();
   }
 

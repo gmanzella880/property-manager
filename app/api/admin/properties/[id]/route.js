@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { requireLandlord } from "@/lib/landlord";
 import { NextResponse } from "next/server";
+import { deleteProperties } from "@/lib/delete-property";
 
 async function verifySuperAdmin() {
   const landlord = await requireLandlord();
@@ -28,6 +29,11 @@ export async function DELETE(request, { params }) {
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;
-  await prisma.property.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    await deleteProperties([id]); // with its units, tenants and their records
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete property error:", error);
+    return NextResponse.json({ error: "Failed to delete property" }, { status: 500 });
+  }
 }

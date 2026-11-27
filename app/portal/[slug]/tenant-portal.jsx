@@ -159,7 +159,7 @@ export default function TenantPortal({ tenant, preview = false, children }) {
                   required
                   rows={4}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] resize-none"
-                  placeholder="Describe the issue..."
+                  aria-label="Describe the issue"
                 />
               </div>
 
@@ -228,7 +228,7 @@ export default function TenantPortal({ tenant, preview = false, children }) {
                   required
                   rows={4}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f] resize-none"
-                  placeholder="Share your thoughts..."
+                  aria-label="Your feedback"
                 />
               </div>
 

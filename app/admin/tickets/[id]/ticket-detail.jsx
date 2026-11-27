@@ -95,7 +95,7 @@ export default function TicketDetail({ ticket, vendors }) {
             <input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Add an update..."
+              aria-label="Add an update"
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
             />
             <button

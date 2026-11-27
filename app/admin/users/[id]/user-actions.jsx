@@ -71,8 +71,13 @@ export default function UserActions({ user, currentUserId }) {
   }
 
   async function deleteProperty(property) {
-    if (!confirm(`Delete "${property.name}"? This will also delete all its units, tenants, and data.`)) return;
-    await fetch(`/api/admin/properties/${property.id}`, { method: "DELETE" });
+    if (!confirm(`Delete "${property.name || "this property"}"? This will also delete all its units, tenants, and data.`)) return;
+    const res = await fetch(`/api/admin/properties/${property.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to delete property");
+      return;
+    }
     router.refresh();
   }
 
@@ -142,7 +147,6 @@ export default function UserActions({ user, currentUserId }) {
                   value={propertyForm.name}
                   onChange={(e) => setPropertyForm({ ...propertyForm, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Georgian Oaks Apartments"
                 />
               </div>
               <div>
@@ -154,7 +158,6 @@ export default function UserActions({ user, currentUserId }) {
                   value={propertyForm.address}
                   onChange={(e) => setPropertyForm({ ...propertyForm, address: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="123 Main St, City, State"
                 />
               </div>
               <p className="text-xs text-gray-400">

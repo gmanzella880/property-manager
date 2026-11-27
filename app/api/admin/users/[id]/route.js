@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { requireLandlord } from "@/lib/landlord";
 import { NextResponse } from "next/server";
+import { deleteProperties } from "@/lib/delete-property";
 
 async function verifySuperAdmin() {
   const landlord = await requireLandlord();
@@ -53,28 +54,17 @@ export async function DELETE(request, { params }) {
 
   try {
     // Delete in order to satisfy foreign key constraints
-    // 1. Delete all nested data under the user's properties
+    // 1. Delete the user's properties and everything under them
     const properties = await prisma.property.findMany({ where: { landlordId: id }, select: { id: true } });
-    const propertyIds = properties.map((p) => p.id);
-    
-    if (propertyIds.length > 0) {
-      const units = await prisma.unit.findMany({ where: { propertyId: { in: propertyIds } }, select: { id: true } });
-      const unitIds = units.map((u) => u.id);
+    await deleteProperties(properties.map((p) => p.id));
 
-      if (unitIds.length > 0) {
-        // Delete tenant-related data
-        await prisma.message.deleteMany({ where: { tenant: { unitId: { in: unitIds } } } });
-        await prisma.ticket.deleteMany({ where: { unitId: { in: unitIds } } });
-        await prisma.document.deleteMany({ where: { unitId: { in: unitIds } } });
-        await prisma.expense.deleteMany({ where: { unitId: { in: unitIds } } });
-        await prisma.tenant.deleteMany({ where: { unitId: { in: unitIds } } });
-      }
-
-      await prisma.unit.deleteMany({ where: { propertyId: { in: propertyIds } } });
-      await prisma.property.deleteMany({ where: { landlordId: id } });
-    }
-
-    // 2. Delete user-level data
+    // 2. Delete user-level data (unlinking or removing rows that point at it first)
+    const vendorIds = (await prisma.vendor.findMany({ where: { landlordId: id }, select: { id: true } })).map((v) => v.id);
+    await prisma.ticket.updateMany({ where: { vendorId: { in: vendorIds } }, data: { vendorId: null } });
+    await prisma.expense.updateMany({ where: { vendorId: { in: vendorIds } }, data: { vendorId: null } });
+    const applicantIds = (await prisma.applicant.findMany({ where: { vacancy: { landlordId: id } }, select: { id: true } })).map((a) => a.id);
+    await prisma.document.deleteMany({ where: { applicantId: { in: applicantIds } } });
+    await prisma.applicant.deleteMany({ where: { id: { in: applicantIds } } });
     await prisma.vendor.deleteMany({ where: { landlordId: id } });
     await prisma.feedback.deleteMany({ where: { landlordId: id } });
     await prisma.vacancy.deleteMany({ where: { landlordId: id } });

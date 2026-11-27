@@ -153,9 +153,9 @@ export default function VacancyPipeline({ units, vacancies }) {
                       {/* Add applicant */}
                       {showAddApplicant === vacancy.id ? (
                         <form onSubmit={(e) => addApplicant(e, vacancy.id)} className="mt-3 space-y-2">
-                          <input name="name" required placeholder="Name" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
-                          <input name="email" type="email" required placeholder="Email" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
-                          <input name="phone" type="tel" required placeholder="Phone" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
+                          <input name="name" required aria-label="Name" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
+                          <input name="email" type="email" required aria-label="Email" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
+                          <input name="phone" type="tel" required aria-label="Phone" className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" />
                           <div className="flex gap-2">
                             <button type="button" onClick={() => setShowAddApplicant(null)} className="px-3 py-1 border border-gray-300 rounded-lg text-xs hover:bg-gray-50 cursor-pointer">Cancel</button>
                             <button type="submit" className="px-3 py-1 bg-[#1e3a5f] text-white rounded-lg text-xs hover:bg-[#2a5280] cursor-pointer">Add</button>

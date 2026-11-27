@@ -18,18 +18,22 @@ export default function UsersList({ users, currentUserId }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", role: "admin" });
+  const blankForm = { name: "", email: "", phone: "", role: "admin", propertyName: "", propertyAddress: "" };
+  const [form, setForm] = useState(blankForm);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   function openAdd() {
     setEditingUser(null);
-    setForm({ name: "", email: "", phone: "", role: "admin" });
+    setForm(blankForm);
+    setError("");
     setShowForm(true);
   }
 
   function openEdit(user) {
     setEditingUser(user);
-    setForm({ name: user.name, email: user.email, phone: user.phone, role: user.role });
+    setForm({ ...blankForm, name: user.name, email: user.email, phone: user.phone, role: user.role });
+    setError("");
     setShowForm(true);
   }
 
@@ -41,22 +45,26 @@ export default function UsersList({ users, currentUserId }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
-    if (editingUser) {
-      await fetch(`/api/admin/users/${editingUser.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-    } else {
-      await fetch("/api/admin/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-    }
+    const res = editingUser
+      ? await fetch(`/api/admin/users/${editingUser.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, role: form.role }),
+        })
+      : await fetch("/api/admin/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
 
     setLoading(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to save user");
+      return;
+    }
     closeForm();
     router.refresh();
   }
@@ -88,7 +96,7 @@ export default function UsersList({ users, currentUserId }) {
       {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-5 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
                 {editingUser ? "Edit User" : "Add User"}
@@ -138,6 +146,39 @@ export default function UsersList({ users, currentUserId }) {
                   <option value="super_admin">Super Admin</option>
                 </select>
               </div>
+              {!editingUser && (
+                <div className="border-t border-gray-200 pt-4 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">Property</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {form.role === "admin"
+                        ? "The property this admin will manage. Admins only see their own properties."
+                        : "Optional. Super admins can see every property."}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Property Name</label>
+                    <input
+                      type="text"
+                      required={form.role === "admin" || !!form.propertyAddress}
+                      value={form.propertyName}
+                      onChange={(e) => setForm({ ...form, propertyName: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Property Address</label>
+                    <input
+                      type="text"
+                      required={form.role === "admin" || !!form.propertyName}
+                      value={form.propertyAddress}
+                      onChange={(e) => setForm({ ...form, propertyAddress: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              )}
+              {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"

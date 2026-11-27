@@ -77,7 +77,6 @@ export default function AddUnitModal() {
               name="unitNumber"
               required
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
-              placeholder="e.g. 101"
             />
           </div>
 
@@ -91,7 +90,6 @@ export default function AddUnitModal() {
               required
               min="0"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
-              placeholder="e.g. 1200"
             />
           </div>
 
@@ -107,7 +105,6 @@ export default function AddUnitModal() {
                   min="0"
                   step="1"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
-                  placeholder="0 = studio"
                 />
               </div>
               <div>
@@ -120,7 +117,6 @@ export default function AddUnitModal() {
                   min="0"
                   step="0.5"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
-                  placeholder="e.g. 1.5"
                 />
               </div>
               <div>
@@ -133,7 +129,6 @@ export default function AddUnitModal() {
                   min="0"
                   step="1"
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
-                  placeholder="e.g. 880"
                 />
               </div>
             </div>

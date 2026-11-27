@@ -117,7 +117,7 @@ export default function MessagesHub({ tenants }) {
                   <textarea
                     value={broadcastMsg}
                     onChange={(e) => setBroadcastMsg(e.target.value)}
-                    placeholder="Type your broadcast message..."
+                    aria-label="Broadcast message"
                     rows={4}
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
                     required
@@ -176,7 +176,7 @@ export default function MessagesHub({ tenants }) {
                 <input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
+                  aria-label="Message"
                   className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]"
                 />
                 <button

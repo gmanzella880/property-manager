@@ -85,7 +85,7 @@ export default function VendorsManager({ vendors }) {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Specialty</label>
-              <input name="specialty" required className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="e.g. Plumbing, Electrical" />
+              <input name="specialty" required className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
             </div>
             <div className="sm:col-span-2 flex gap-2">
               <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 cursor-pointer">Cancel</button>
@@ -100,10 +100,10 @@ export default function VendorsManager({ vendors }) {
           editingVendor === vendor.id ? (
             <div key={vendor.id} className="bg-white rounded-xl border border-blue-200 p-5">
               <form onSubmit={(e) => handleEdit(e, vendor.id)} className="space-y-3">
-                <input name="name" defaultValue={vendor.name} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" placeholder="Name" />
-                <input name="phone" defaultValue={vendor.phone} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" placeholder="Phone" />
-                <input name="email" defaultValue={vendor.email || ""} className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" placeholder="Email" />
-                <input name="specialty" defaultValue={vendor.specialty} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" placeholder="Specialty" />
+                <input name="name" defaultValue={vendor.name} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" aria-label="Name" />
+                <input name="phone" defaultValue={vendor.phone} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" aria-label="Phone" />
+                <input name="email" defaultValue={vendor.email || ""} className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" aria-label="Email" />
+                <input name="specialty" defaultValue={vendor.specialty} required className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm" aria-label="Specialty" />
                 <div className="flex gap-2">
                   <button type="button" onClick={() => setEditingVendor(null)} className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs hover:bg-gray-50 cursor-pointer">Cancel</button>
                   <button type="submit" className="px-3 py-1.5 bg-[#1e3a5f] text-white rounded-lg text-xs hover:bg-[#2a5280] cursor-pointer">Save</button>

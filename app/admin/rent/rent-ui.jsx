@@ -88,8 +88,7 @@ export function RecordPaymentModal({ tenant, period, suggestedCents, onClose }) 
         </label>
         <label className="block text-sm font-medium text-gray-700">
           {form.method === "other" ? "How did they pay?" : form.method === "check" ? "Check number (optional)" : "Note (optional)"}
-          <input name="note" value={form.note} onChange={set("note")} required={form.method === "other"} maxLength={200}
-            placeholder={form.method === "other" ? "e.g. Zelle, Venmo, work traded" : form.method === "check" ? "e.g. #1042" : ""} className={`${input} mt-1`} />
+          <input name="note" value={form.note} onChange={set("note")} required={form.method === "other"} maxLength={200} className={`${input} mt-1`} />
         </label>
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <div className="flex gap-3 pt-1">
