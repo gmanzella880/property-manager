@@ -29,3 +29,33 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/property-manager:latest
             ghcr.io/${{ github.repository_owner }}/property-manager:${{ github.sha }}
+
+  # Portainer watches main but can't re-pull a changed :latest (a paid feature
+  # in Portainer CE), so after the image exists, pin this exact build in
+  # docker-compose.yml. The compose change is what makes Portainer redeploy.
+  # Commits pushed with GITHUB_TOKEN don't start another workflow run.
+  pin-image:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: pin-image
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Pin this build in docker-compose.yml on main
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          sed -i -E "s#ghcr.io/[A-Za-z0-9_.-]+/property-manager:[A-Za-z0-9_.-]+#ghcr.io/${OWNER}/property-manager:${GITHUB_SHA}#" docker-compose.yml
+          grep -q "property-manager:${GITHUB_SHA}" docker-compose.yml
+          git diff --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Deploy ${GITHUB_SHA}"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && exit 0; sleep 5; done
+          exit 1
