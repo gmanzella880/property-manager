@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request) {
   await requireLandlord(); // landlords only (tenants and signed-out users are redirected)
   const body = await request.json();
-  const { name, email, phone, unitId, leaseStart, leaseEnd, rentAmount } = body;
+  const { name, email, phone, unitId, leaseStart, leaseEnd } = body;
 
   if (!name || !email || !phone || !unitId || !leaseStart || !leaseEnd) {
     return NextResponse.json({ error: "All fields are required" }, { status: 400 });
@@ -36,14 +36,6 @@ export async function POST(request) {
   const existing = await prisma.tenant.findUnique({ where: { unitId } });
   if (existing) {
     return NextResponse.json({ error: "This unit already has a tenant" }, { status: 400 });
-  }
-
-  // Update rent amount if provided
-  if (rentAmount != null) {
-    await prisma.unit.update({
-      where: { id: unitId },
-      data: { rentAmount: parseInt(rentAmount) },
-    });
   }
 
   // Generate unique slug
